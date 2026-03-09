@@ -1,0 +1,51 @@
+services:
+  backend:
+    container_name: agentforge-backend
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app/backend
+      - agentforge_data:/app/data
+    env_file:
+      - .env
+    depends_on:
+      - ollama
+    networks:
+      - agentforge
+
+  frontend:
+    container_name: agentforge-frontend
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend/src:/app/src
+    networks:
+      - agentforge
+    depends_on:
+      - backend
+
+  ollama:
+    container_name: agentforge-ollama
+    image: ollama/ollama:0.16.2
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    networks:
+      - agentforge
+    environment:
+      - OLLAMA_DEBUG=INFO
+
+networks:
+  agentforge:
+    driver: bridge
+
+volumes:
+  agentforge_data:
+  ollama_data:
